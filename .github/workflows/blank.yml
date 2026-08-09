@@ -26,6 +26,13 @@ jobs:
         PROJECT_ROOT=$(dirname "$BUILD_GRADLE_PATH")
         echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
 
+    - name: Configure AndroidX Properties
+      run: |
+        PROPERTIES_FILE="$PROJECT_ROOT/gradle.properties"
+        touch "$PROPERTIES_FILE"
+        echo "android.useAndroidX=true" >> "$PROPERTIES_FILE"
+        echo "android.enableJetifier=true" >> "$PROPERTIES_FILE"
+
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
