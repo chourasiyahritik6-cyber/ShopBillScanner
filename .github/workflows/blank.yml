@@ -20,25 +20,21 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Find Project Root and Generate Modern Gradle Wrapper
+    - name: Find Project Root
       run: |
-        # Find where build.gradle or build.gradle.kts lives
         BUILD_GRADLE_PATH=$(find project_folder -name "build.gradle" -o -name "build.gradle.kts" | head -n 1)
         PROJECT_ROOT=$(dirname "$BUILD_GRADLE_PATH")
         echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
-        
-        # Download and configure a modern Gradle version (8.5) securely
-        cd "$PROJECT_ROOT"
-        curl -L -o gradle-8.5-bin.zip https://gradle.org
-        unzip -q gradle-8.5-bin.zip
-        export PATH=$PWD/gradle-8.5/bin:$PATH
-        gradle wrapper --gradle-version 8.5
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.5'
 
     - name: Build with Gradle
       run: |
         cd "$PROJECT_ROOT"
-        chmod +x gradlew
-        ./gradlew assembleDebug
+        gradle assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
