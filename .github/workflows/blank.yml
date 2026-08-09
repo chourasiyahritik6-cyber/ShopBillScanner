@@ -21,15 +21,20 @@ jobs:
         distribution: 'temurin'
 
     - name: Grant execute permission for gradlew
-      run: chmod +x project_folder/gradlew
+      run: |
+        GRADLEW_PATH=$(find project_folder -name gradlew)
+        chmod +x "$GRADLEW_PATH"
+        echo "GRADLEW_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
 
     - name: Build with Gradle
       run: |
-        cd project_folder
+        cd "$GRADLEW_DIR"
         ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: project_folder/app/build/outputs/apk/debug/app-debug.apk
+        path: |
+          project_folder/**/build/outputs/apk/debug/app-debug.apk
+          project_folder/**/build/outputs/apk/debug/*.apk
