@@ -26,7 +26,7 @@ jobs:
         PROJECT_ROOT=$(dirname "$BUILD_GRADLE_PATH")
         echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
 
-    - name: Fix Java Version and AndroidX Properties
+    - name: Force Java 17 and AndroidX Properties
       run: |
         # Append AndroidX flags
         PROPERTIES_FILE="$PROJECT_ROOT/gradle.properties"
@@ -34,10 +34,11 @@ jobs:
         echo "android.useAndroidX=true" >> "$PROPERTIES_FILE"
         echo "android.enableJetifier=true" >> "$PROPERTIES_FILE"
         
-        # Automatically swap any hardcoded Java 1.8 targets with Java 17 inside the build files
-        find project_folder -name "build.gradle" -type f -exec sed -i 's/JavaVersion.VERSION_1_8/JavaVersion.VERSION_17/g' {} +
-        find project_folder -name "build.gradle" -type f -exec sed -i "s/compatibility JavaVersion.VERSION_1_8/compatibility JavaVersion.VERSION_17/g" {} +
-        find project_folder -name "build.gradle" -type f -exec sed -i "s/jvmTarget = '1.8'/jvmTarget = '17'/g" {} +
+        # Aggressive substitution for various syntax patterns of Java 1.8 to 17
+        find project_folder -name "build.gradle" -type f -exec sed -i 's/1.8/17/g' {} +
+        find project_folder -name "build.gradle" -type f -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
+        find project_folder -name "build.gradle.kts" -type f -exec sed -i 's/1.8/17/g' {} +
+        find project_folder -name "build.gradle.kts" -type f -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
