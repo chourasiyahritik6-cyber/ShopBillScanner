@@ -26,29 +26,24 @@ jobs:
         PROJECT_ROOT=$(dirname "$BUILD_GRADLE_PATH")
         echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
 
-    - name: Force Java 17 and AndroidX Properties
+    - name: Configure AndroidX Properties
       run: |
-        # Append AndroidX flags
         PROPERTIES_FILE="$PROJECT_ROOT/gradle.properties"
         touch "$PROPERTIES_FILE"
         echo "android.useAndroidX=true" >> "$PROPERTIES_FILE"
         echo "android.enableJetifier=true" >> "$PROPERTIES_FILE"
-        
-        # Aggressive substitution for various syntax patterns of Java 1.8 to 17
-        find project_folder -name "build.gradle" -type f -exec sed -i 's/1.8/17/g' {} +
-        find project_folder -name "build.gradle" -type f -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
-        find project_folder -name "build.gradle.kts" -type f -exec sed -i 's/1.8/17/g' {} +
-        find project_folder -name "build.gradle.kts" -type f -exec sed -i 's/VERSION_1_8/VERSION_17/g' {} +
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.9'
 
-    - name: Build with Gradle
+    - name: Build with Gradle (Force Toolchain)
       run: |
         cd "$PROJECT_ROOT"
-        gradle assembleDebug
+        gradle assembleDebug -Pandroid.experimental.jetty.enabled=true \
+          -Dorg.gradle.java.home=$JAVA_HOME_17_X64 \
+          -Pkotlin.compiler.jvmTarget=17
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
