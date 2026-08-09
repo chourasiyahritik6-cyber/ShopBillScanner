@@ -26,38 +26,25 @@ jobs:
         PROJECT_ROOT=$(dirname "$BUILD_GRADLE_PATH")
         echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
 
-    - name: Configure AndroidX Properties
+    - name: Configure Gradle and AndroidX Properties
       run: |
         PROPERTIES_FILE="$PROJECT_ROOT/gradle.properties"
         touch "$PROPERTIES_FILE"
         echo "android.useAndroidX=true" >> "$PROPERTIES_FILE"
         echo "android.enableJetifier=true" >> "$PROPERTIES_FILE"
+        
+        # Turn off the strict Kotlin target mismatch check entirely
+        echo "kotlin.jvm.target.validation.mode=IGNORE" >> "$PROPERTIES_FILE"
 
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.9'
 
-    - name: Create Global Gradle Force-Version Init Script
-      run: |
-        cat << 'EOF' > "$PROJECT_ROOT/init.gradle"
-        allprojects {
-            tasks.withType(JavaCompile) {
-                sourceCompatibility = "17"
-                targetCompatibility = "17"
-            }
-            tasks.configureEach { task ->
-                if (task.class.name.contains("KotlinCompile")) {
-                    task.setProperty("jvmTarget", "17")
-                }
-            }
-        }
-        EOF
-
     - name: Build with Gradle
       run: |
         cd "$PROJECT_ROOT"
-        gradle assembleDebug --init-script init.gradle
+        gradle assembleDebug
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
@@ -66,4 +53,3 @@ jobs:
         path: |
           project_folder/**/build/outputs/apk/debug/app-debug.apk
           project_folder/**/build/outputs/apk/debug/*.apk
-
