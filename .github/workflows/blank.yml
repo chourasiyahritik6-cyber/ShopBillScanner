@@ -20,15 +20,22 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Grant execute permission for gradlew
+    - name: Find Project Root and Generate Gradle Wrapper
       run: |
-        GRADLEW_PATH=$(find project_folder -name gradlew)
-        chmod +x "$GRADLEW_PATH"
-        echo "GRADLEW_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
+        # Find where build.gradle or build.gradle.kts lives
+        BUILD_GRADLE_PATH=$(find project_folder -name "build.gradle" -o -name "build.gradle.kts" | head -n 1)
+        PROJECT_ROOT=$(dirname "$BUILD_GRADLE_PATH")
+        echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
+        
+        # Install gradle locally on the runner and generate a fresh wrapper
+        sudo apt-get update && sudo apt-get install -y gradle
+        cd "$PROJECT_ROOT"
+        gradle wrapper
 
     - name: Build with Gradle
       run: |
-        cd "$GRADLEW_DIR"
+        cd "$PROJECT_ROOT"
+        chmod +x gradlew
         ./gradlew assembleDebug
 
     - name: Upload APK
