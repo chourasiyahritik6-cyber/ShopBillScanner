@@ -27,9 +27,9 @@ jobs:
         PROJECT_ROOT=$(dirname "$BUILD_GRADLE_PATH")
         echo "PROJECT_ROOT=$PROJECT_ROOT" >> $GITHUB_ENV
         
-        # Download and configure a modern Gradle version (8.5) that supports Java 17
+        # Download and configure a modern Gradle version (8.5) securely
         cd "$PROJECT_ROOT"
-        wget https://gradle.org
+        curl -L -o gradle-8.5-bin.zip https://gradle.org
         unzip -q gradle-8.5-bin.zip
         export PATH=$PWD/gradle-8.5/bin:$PATH
         gradle wrapper --gradle-version 8.5
