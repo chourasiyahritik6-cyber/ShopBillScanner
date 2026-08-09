@@ -48,7 +48,7 @@ jobs:
             }
             tasks.configureEach { task ->
                 if (task.class.name.contains("KotlinCompile")) {
-                    task.compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+                    task.setProperty("jvmTarget", "17")
                 }
             }
         }
@@ -66,3 +66,4 @@ jobs:
         path: |
           project_folder/**/build/outputs/apk/debug/app-debug.apk
           project_folder/**/build/outputs/apk/debug/*.apk
+
