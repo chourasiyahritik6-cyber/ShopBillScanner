@@ -40,7 +40,7 @@ jobs:
 
     - name: Create Global Gradle Force-Version Init Script
       run: |
-        cat << 'EOF' > init.gradle
+        cat << 'EOF' > "$PROJECT_ROOT/init.gradle"
         allprojects {
             tasks.withType(JavaCompile) {
                 sourceCompatibility = "17"
@@ -57,7 +57,7 @@ jobs:
     - name: Build with Gradle
       run: |
         cd "$PROJECT_ROOT"
-        gradle assembleDebug --init-script ../init.gradle
+        gradle assembleDebug --init-script init.gradle
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
