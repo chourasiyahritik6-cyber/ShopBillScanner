@@ -38,12 +38,26 @@ jobs:
       with:
         gradle-version: '8.9'
 
-    - name: Build with Gradle (Force Toolchain)
+    - name: Create Global Gradle Force-Version Init Script
+      run: |
+        cat << 'EOF' > init.gradle
+        allprojects {
+            tasks.withType(JavaCompile) {
+                sourceCompatibility = "17"
+                targetCompatibility = "17"
+            }
+            tasks.configureEach { task ->
+                if (task.class.name.contains("KotlinCompile")) {
+                    task.compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+                }
+            }
+        }
+        EOF
+
+    - name: Build with Gradle
       run: |
         cd "$PROJECT_ROOT"
-        gradle assembleDebug -Pandroid.experimental.jetty.enabled=true \
-          -Dorg.gradle.java.home=$JAVA_HOME_17_X64 \
-          -Pkotlin.compiler.jvmTarget=17
+        gradle assembleDebug --init-script ../init.gradle
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
